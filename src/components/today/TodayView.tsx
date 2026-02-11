@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   CheckCircle2, Circle, Flame, ArrowRight, AlertTriangle, RotateCcw,
   BookOpen, Search, Newspaper, Swords, Coffee,
-  Dumbbell, Moon, Briefcase, Code, Monitor,
+  Dumbbell, Moon, Briefcase, Code, Monitor, Brain,
 } from 'lucide-react';
 import { useProgressStore } from '@/stores/progress-store.ts';
 import { useSettingsStore } from '@/stores/settings-store.ts';
@@ -16,6 +16,7 @@ import { ProgressBar } from '@/components/shared/ProgressBar.tsx';
 import { DailyConfig } from '@/components/today/DailyConfig.tsx';
 import { BadDayModal } from '@/components/today/BadDayModal.tsx';
 import curriculum from '@/data/curriculum.json';
+import { getAIMonthForCurriculumMonth } from '@/data/ai-curriculum.ts';
 import type { TaskType } from '@/types/index.ts';
 
 // Category icons + colors
@@ -31,6 +32,7 @@ const BLOCK_STYLES: Record<string, { icon: typeof BookOpen; color: string }> = {
   'DEEP LEARNING': { icon: BookOpen, color: 'text-cyan-400' },
   'ISLAM': { icon: Moon, color: 'text-indigo-400' },
   'PROJEKT': { icon: Monitor, color: 'text-orange-400' },
+  'AI SECURITY': { icon: Brain, color: 'text-pink-400' },
 };
 
 function getBlockStyle(category: string) {
@@ -130,6 +132,31 @@ export function TodayView() {
     return tasks;
   }, [getEntriesForDate]);
 
+  // AI Security tasks for current week
+  const aiTasks = useMemo(() => {
+    const aiMonth = getAIMonthForCurriculumMonth(currentMonth);
+    if (!aiMonth) return [];
+    const weekIdx = Math.max(0, Math.min(currentWeek - 1, aiMonth.weeks.length - 1));
+    const aiWeek = aiMonth.weeks[weekIdx];
+    if (!aiWeek) return [];
+    return aiWeek.tasks.map(t => ({
+      ...t,
+      type: 'daily_task' as TaskType,
+      isCheckbox: true,
+    }));
+  }, [currentMonth, currentWeek]);
+
+  const aiWeekTopic = useMemo(() => {
+    const aiMonth = getAIMonthForCurriculumMonth(currentMonth);
+    if (!aiMonth) return null;
+    const weekIdx = Math.max(0, Math.min(currentWeek - 1, aiMonth.weeks.length - 1));
+    return aiMonth.weeks[weekIdx]?.topic || null;
+  }, [currentMonth, currentWeek]);
+
+  const aiMonthTitle = useMemo(() => {
+    return getAIMonthForCurriculumMonth(currentMonth)?.title || null;
+  }, [currentMonth]);
+
   // Monthly goals
   const goals = monthData?.goals || [];
   // Weekly goals
@@ -146,8 +173,8 @@ export function TodayView() {
   // KPIs
   const kpis = monthData?.kpis || [];
 
-  // Totals (include rescheduled tasks)
-  const allCheckable = [...allDayTasks, ...rescheduledTasks, ...goals, ...weekGoals, ...kpis];
+  // Totals (include rescheduled tasks + AI tasks)
+  const allCheckable = [...allDayTasks, ...aiTasks, ...rescheduledTasks, ...goals, ...weekGoals, ...kpis];
   const completedCount = allCheckable.filter(t => completedTaskIds.has(t.id)).length;
   const totalCount = allCheckable.length;
 
@@ -388,6 +415,60 @@ export function TodayView() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* === AI SECURITY BLOCK (2h/Tag) === */}
+      {aiTasks.length > 0 && (
+        <div
+          className={cn(
+            'rounded-xl border transition-all',
+            'border-pink-500/30 bg-pink-500/5',
+          )}
+        >
+          <div className="flex items-center gap-3 px-4 py-3">
+            <Brain size={16} className="text-pink-400 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono text-text-muted">2h/Tag</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-400 font-bold">AI</span>
+              </div>
+              <p className="text-sm font-medium">AI SECURITY — {aiMonthTitle}</p>
+              {aiWeekTopic && (
+                <p className="text-[10px] text-text-muted mt-0.5">Woche {currentWeek}: {aiWeekTopic}</p>
+              )}
+            </div>
+            <span className="text-[10px] text-text-muted shrink-0">
+              {aiTasks.filter(t => completedTaskIds.has(t.id)).length}/{aiTasks.length}
+            </span>
+          </div>
+          <div className="px-4 pb-3 space-y-1">
+            {aiTasks.map((task) => {
+              const done = completedTaskIds.has(task.id);
+              const xp = getXpForTaskType('daily_task');
+              return (
+                <button
+                  key={task.id}
+                  onClick={() => handleToggle(task.id, 'daily_task')}
+                  className={cn(
+                    'w-full flex items-start gap-3 px-3 py-2 rounded-lg text-left transition-all',
+                    'hover:bg-bg-hover group',
+                    done && 'opacity-50',
+                  )}
+                >
+                  {done ? (
+                    <CheckCircle2 size={16} className="text-success shrink-0 mt-0.5" />
+                  ) : (
+                    <Circle size={16} className="text-text-muted shrink-0 mt-0.5 group-hover:text-pink-400" />
+                  )}
+                  <span className={cn('text-sm flex-1', done && 'line-through')}>
+                    {task.text}
+                  </span>
+                  {done && <XpBadge amount={xp} className="shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
