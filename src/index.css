@@ -71,3 +71,21 @@
 .animate-xp-pop { animation: xp-pop 0.3s ease-out; }
 .animate-slide-up { animation: slide-up 0.3s ease-out; }
 .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* Flashcard flip animation */
+.flashcard-container { perspective: 1000px; }
+.flashcard-inner {
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+.flashcard-container.flipped .flashcard-inner { transform: rotateY(180deg); }
+.flashcard-front, .flashcard-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flashcard-back {
+  transform: rotateY(180deg);
+  position: absolute;
+  inset: 0;
+}

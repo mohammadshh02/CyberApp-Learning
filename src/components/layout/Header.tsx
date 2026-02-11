@@ -9,6 +9,7 @@ const VIEW_TITLES: Record<string, string> = {
   today: 'Heute',
   calendar: 'Kalender',
   curriculum: 'Curriculum',
+  glossary: 'Glossar',
   achievements: 'Achievements',
   settings: 'Einstellungen',
 };

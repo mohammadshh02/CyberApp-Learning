@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, CalendarDays, BookOpen, Trophy, Sun,
+  LayoutDashboard, CalendarDays, BookOpen, Trophy, Sun, BookA,
 } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store.ts';
 import { cn } from '@/lib/utils.ts';
@@ -10,6 +10,7 @@ const NAV_ITEMS: { id: ViewId; label: string; icon: React.ReactNode }[] = [
   { id: 'today', label: 'Heute', icon: <Sun size={20} /> },
   { id: 'calendar', label: 'Kalender', icon: <CalendarDays size={20} /> },
   { id: 'curriculum', label: 'Lernen', icon: <BookOpen size={20} /> },
+  { id: 'glossary', label: 'Glossar', icon: <BookA size={20} /> },
   { id: 'achievements', label: 'Badges', icon: <Trophy size={20} /> },
 ];
 

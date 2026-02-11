@@ -264,8 +264,38 @@ export type ViewId =
   | 'today'
   | 'calendar'
   | 'curriculum'
+  | 'glossary'
   | 'achievements'
   | 'settings';
+
+// ===== GLOSSARY TYPES =====
+
+export const GLOSSARY_CATEGORIES = [
+  'Python', 'Linux', 'Netzwerk', 'OSINT', 'Forensik', 'Kryptographie',
+  'Penetration Testing', 'Social Engineering', 'Reverse Engineering',
+  'Malware Analysis', 'Mobile Security', 'Wireless/RF', 'Active Directory',
+  'Blockchain/Crypto Tracing', 'AML/Compliance', 'Threat Intelligence', 'Allgemein',
+] as const;
+export type GlossaryCategory = typeof GLOSSARY_CATEGORIES[number];
+
+export interface GlossaryEntry {
+  id: string;
+  term: string;
+  definition: string;
+  category: GlossaryCategory;
+  isCustom: boolean;
+}
+
+export interface FlashcardProgress {
+  id?: number;
+  termId: string;
+  known: boolean;
+  lastReviewedAt: string;
+  reviewCount: number;
+  correctCount: number;
+}
+
+export type GlossaryMode = 'overview' | 'flashcards';
 
 // ===== LEVEL SYSTEM =====
 
