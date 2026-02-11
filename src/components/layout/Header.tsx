@@ -10,6 +10,7 @@ const VIEW_TITLES: Record<string, string> = {
   calendar: 'Kalender',
   curriculum: 'Curriculum',
   glossary: 'Glossar',
+  intel: 'Wissensdatenbank',
   achievements: 'Achievements',
   settings: 'Einstellungen',
 };

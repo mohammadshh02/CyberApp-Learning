@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, CalendarDays, BookOpen, Trophy, Settings, Sun,
-  ChevronLeft, ChevronRight, Crosshair, BookA,
+  ChevronLeft, ChevronRight, Crosshair, BookA, Database,
 } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store.ts';
 import { useProgressStore } from '@/stores/progress-store.ts';
@@ -15,6 +15,7 @@ const NAV_ITEMS: { id: ViewId; label: string; icon: React.ReactNode }[] = [
   { id: 'calendar', label: 'Kalender', icon: <CalendarDays size={20} /> },
   { id: 'curriculum', label: 'Curriculum', icon: <BookOpen size={20} /> },
   { id: 'glossary', label: 'Glossar', icon: <BookA size={20} /> },
+  { id: 'intel', label: 'Intel', icon: <Database size={20} /> },
   { id: 'achievements', label: 'Achievements', icon: <Trophy size={20} /> },
   { id: 'settings', label: 'Einstellungen', icon: <Settings size={20} /> },
 ];

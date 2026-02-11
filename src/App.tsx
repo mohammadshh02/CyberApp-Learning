@@ -5,6 +5,7 @@ import { useScheduleStore } from './stores/schedule-store.ts';
 import { useSettingsStore } from './stores/settings-store.ts';
 import { useDailyPlannerStore } from './stores/daily-planner-store.ts';
 import { useGlossaryStore } from './stores/glossary-store.ts';
+import { useIntelStore } from './stores/intel-store.ts';
 import { AppShell } from './components/layout/AppShell.tsx';
 import { Dashboard } from './components/dashboard/Dashboard.tsx';
 import { TodayView } from './components/today/TodayView.tsx';
@@ -12,6 +13,7 @@ import { CalendarView } from './components/calendar/CalendarView.tsx';
 import { CurriculumView } from './components/curriculum/CurriculumView.tsx';
 import { GlossaryView } from './components/glossary/GlossaryView.tsx';
 import { AchievementsView } from './components/achievements/AchievementsView.tsx';
+import { IntelView } from './components/intel/IntelView.tsx';
 import { SettingsView } from './components/settings/SettingsView.tsx';
 
 function App() {
@@ -21,6 +23,7 @@ function App() {
   const initSettings = useSettingsStore((s) => s.init);
   const initDailyPlanner = useDailyPlannerStore((s) => s.init);
   const initGlossary = useGlossaryStore((s) => s.init);
+  const initIntel = useIntelStore((s) => s.init);
 
   useEffect(() => {
     initSettings().then(() => {
@@ -29,7 +32,8 @@ function App() {
     initProgress();
     initSchedule();
     initGlossary();
-  }, [initSettings, initProgress, initSchedule, initDailyPlanner, initGlossary]);
+    initIntel();
+  }, [initSettings, initProgress, initSchedule, initDailyPlanner, initGlossary, initIntel]);
 
   const renderView = () => {
     switch (activeView) {
@@ -38,6 +42,7 @@ function App() {
       case 'calendar': return <CalendarView />;
       case 'curriculum': return <CurriculumView />;
       case 'glossary': return <GlossaryView />;
+      case 'intel': return <IntelView />;
       case 'achievements': return <AchievementsView />;
       case 'settings': return <SettingsView />;
       default: return <Dashboard />;

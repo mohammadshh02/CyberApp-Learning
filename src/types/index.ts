@@ -265,8 +265,62 @@ export type ViewId =
   | 'calendar'
   | 'curriculum'
   | 'glossary'
+  | 'intel'
   | 'achievements'
   | 'settings';
+
+// ===== INTEL TYPES =====
+
+export const INTEL_CATEGORIES = [
+  'Endpoint Security', 'Network Security', 'SIEM & SOC',
+  'Threat Intelligence', 'Forensik & IR', 'Offensive Security',
+  'Surveillance & Intelligence', 'Cloud Security', 'Identity & Access',
+  'Data Security', 'Hardware Security',
+] as const;
+export type IntelCategory = typeof INTEL_CATEGORIES[number];
+
+export interface CompanyProduct {
+  name: string;
+  description: string;
+  type?: string;
+}
+
+export interface CompanyProfile {
+  id: string;
+  name: string;
+  category: IntelCategory;
+  country: string;
+  description: string;
+  products: CompanyProduct[];
+  technologies: string[];
+  infrastructureType: string;
+  infrastructureNotes: string;
+  whyItMatters: string;
+  website?: string;
+  founded?: string;
+  isFeatured?: boolean;
+}
+
+export interface IntelNote {
+  id: string;
+  companyId: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IntelDocRef {
+  id: string;
+  companyId: string;
+  title: string;
+  description: string;
+  filePath?: string;
+  url?: string;
+  createdAt: string;
+}
+
+export type IntelViewMode = 'overview' | 'saytec';
 
 // ===== GLOSSARY TYPES =====
 
