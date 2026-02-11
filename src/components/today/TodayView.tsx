@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { CheckCircle2, Circle, Clock, ChevronDown, ChevronUp, Flame } from 'lucide-react';
+import { useMemo } from 'react';
+import { CheckCircle2, Circle, Flame } from 'lucide-react';
 import { useProgressStore } from '@/stores/progress-store.ts';
 import { useSettingsStore } from '@/stores/settings-store.ts';
 import { getCurrentMonthIndex, getCurrentWeekInMonth } from '@/lib/scheduler.ts';
@@ -8,13 +8,14 @@ import { cn } from '@/lib/utils.ts';
 import { Card } from '@/components/shared/Card.tsx';
 import { XpBadge } from '@/components/shared/XpBadge.tsx';
 import { ProgressBar } from '@/components/shared/ProgressBar.tsx';
+import { DailyConfig } from '@/components/today/DailyConfig.tsx';
+import { GeneratedSchedule } from '@/components/today/GeneratedSchedule.tsx';
 import curriculum from '@/data/curriculum.json';
 import type { TaskType } from '@/types/index.ts';
 
 export function TodayView() {
   const { completedTaskIds, completeTask, uncompleteTask, currentStreak, totalXp } = useProgressStore();
   const { startDate } = useSettingsStore();
-  const [expandedBlock, setExpandedBlock] = useState<string | null>(null);
 
   const currentMonth = getCurrentMonthIndex(startDate);
   const currentWeek = getCurrentWeekInMonth(startDate);
@@ -25,7 +26,7 @@ export function TodayView() {
 
   // Get current week's tasks and goals
   const todayTasks = useMemo(() => {
-    if (!monthData) return { goals: [], weekGoals: [], dailySchedule: curriculum.dailySchedule };
+    if (!monthData) return { goals: [], weekGoals: [] };
 
     const goals = monthData.goals.map(g => ({
       ...g,
@@ -42,7 +43,7 @@ export function TodayView() {
       isCheckbox: true,
     })) || [];
 
-    return { goals, weekGoals, dailySchedule: curriculum.dailySchedule };
+    return { goals, weekGoals };
   }, [monthData, currentWeek]);
 
   // KPIs for this month
@@ -91,39 +92,11 @@ export function TodayView() {
         </div>
       </div>
 
-      {/* Daily Schedule */}
-      <Card>
-        <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-          <Clock size={16} className="text-accent" />
-          Tagesstruktur
-        </h3>
-        <div className="space-y-1">
-          {todayTasks.dailySchedule.map((block, i) => {
-            const isExpanded = expandedBlock === block.time;
-            const isWorkBlock = !['Frühstück', 'Mittagspause + Podcast', 'Abendessen', 'GYM', 'ISLAM'].some(x => block.block.includes(x));
-            return (
-              <div key={i}>
-                <button
-                  onClick={() => setExpandedBlock(isExpanded ? null : block.time)}
-                  className={cn(
-                    'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors',
-                    isWorkBlock ? 'hover:bg-bg-hover' : 'opacity-60'
-                  )}
-                >
-                  <span className="text-xs text-text-muted w-24 shrink-0 font-mono">{block.time}</span>
-                  <span className={cn('text-sm flex-1', isWorkBlock && 'font-medium')}>{block.block}</span>
-                  {isWorkBlock && (isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
-                </button>
-                {isExpanded && isWorkBlock && (
-                  <div className="ml-28 pl-3 border-l border-border mb-2 text-xs text-text-muted">
-                    Aktueller Fokus: Monat {currentMonth}, Woche {currentWeek}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </Card>
+      {/* Daily Planner Config */}
+      <DailyConfig />
+
+      {/* Generated Schedule */}
+      <GeneratedSchedule />
 
       {/* Monthly Goals */}
       <Card>

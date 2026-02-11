@@ -3,6 +3,7 @@ import { useAppStore } from './stores/app-store.ts';
 import { useProgressStore } from './stores/progress-store.ts';
 import { useScheduleStore } from './stores/schedule-store.ts';
 import { useSettingsStore } from './stores/settings-store.ts';
+import { useDailyPlannerStore } from './stores/daily-planner-store.ts';
 import { AppShell } from './components/layout/AppShell.tsx';
 import { Dashboard } from './components/dashboard/Dashboard.tsx';
 import { TodayView } from './components/today/TodayView.tsx';
@@ -16,12 +17,15 @@ function App() {
   const initProgress = useProgressStore((s) => s.init);
   const initSchedule = useScheduleStore((s) => s.init);
   const initSettings = useSettingsStore((s) => s.init);
+  const initDailyPlanner = useDailyPlannerStore((s) => s.init);
 
   useEffect(() => {
-    initSettings();
+    initSettings().then(() => {
+      initDailyPlanner();
+    });
     initProgress();
     initSchedule();
-  }, [initSettings, initProgress, initSchedule]);
+  }, [initSettings, initProgress, initSchedule, initDailyPlanner]);
 
   const renderView = () => {
     switch (activeView) {

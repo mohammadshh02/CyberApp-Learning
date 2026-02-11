@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Moon, Sun, Calendar, Download, Upload, Trash2, AlertTriangle } from 'lucide-react';
+import { Moon, Sun, Calendar, Download, Upload, Trash2, AlertTriangle, Clock, Plus, X } from 'lucide-react';
 import { useSettingsStore } from '@/stores/settings-store.ts';
 import { exportAllData, importAllData, clearAllData } from '@/lib/db.ts';
 import { cn } from '@/lib/utils.ts';
@@ -7,13 +7,43 @@ import { Card } from '@/components/shared/Card.tsx';
 import { Modal } from '@/components/shared/Modal.tsx';
 import type { RescheduleStrategy } from '@/types/index.ts';
 
+const DAY_LABELS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
 export function SettingsView() {
   const {
     theme, startDate, rescheduleStrategy, catchUpMaxExtraTasks,
+    defaultWakeUpTime, defaultBedTime, personalBlockTemplates,
     setTheme, setStartDate, setRescheduleStrategy, setCatchUpMaxExtraTasks,
+    setDefaultWakeUpTime, setDefaultBedTime, addTemplate, removeTemplate, updateTemplate,
   } = useSettingsStore();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [showAddTemplate, setShowAddTemplate] = useState(false);
+  const [newTplLabel, setNewTplLabel] = useState('');
+  const [newTplStart, setNewTplStart] = useState('09:00');
+  const [newTplEnd, setNewTplEnd] = useState('12:00');
+  const [newTplDays, setNewTplDays] = useState<number[]>([]);
+
+  const handleAddTemplate = () => {
+    if (!newTplLabel.trim()) return;
+    addTemplate({
+      label: newTplLabel.trim(),
+      startTime: newTplStart,
+      endTime: newTplEnd,
+      activeDays: newTplDays,
+    });
+    setNewTplLabel('');
+    setNewTplStart('09:00');
+    setNewTplEnd('12:00');
+    setNewTplDays([]);
+    setShowAddTemplate(false);
+  };
+
+  const toggleDay = (day: number) => {
+    setNewTplDays(prev =>
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    );
+  };
 
   const handleExport = async () => {
     const data = await exportAllData();
@@ -143,6 +173,146 @@ export function SettingsView() {
             />
           </div>
         )}
+      </Card>
+
+      {/* Daily Planner Defaults */}
+      <Card>
+        <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+          <Clock size={16} className="text-accent" />
+          Tagesplan-Vorlagen
+        </h3>
+        <p className="text-xs text-text-muted mb-4">
+          Standard-Zeiten und wiederkehrende persönliche Blöcke für den täglichen Planer.
+        </p>
+
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div>
+            <label className="text-xs text-text-muted">Standard-Aufwachzeit</label>
+            <input
+              type="time"
+              value={defaultWakeUpTime}
+              onChange={(e) => setDefaultWakeUpTime(e.target.value)}
+              className="w-full mt-1 bg-bg-hover border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-text-muted">Standard-Schlafenszeit</label>
+            <input
+              type="time"
+              value={defaultBedTime}
+              onChange={(e) => setDefaultBedTime(e.target.value)}
+              className="w-full mt-1 bg-bg-hover border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+            />
+          </div>
+        </div>
+
+        <div className="border-t border-border pt-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs text-text-muted font-medium">Wiederkehrende Blöcke</span>
+            <button
+              onClick={() => setShowAddTemplate(true)}
+              className="flex items-center gap-1 text-xs text-accent hover:text-accent/80 transition-colors"
+            >
+              <Plus size={14} />
+              Hinzufügen
+            </button>
+          </div>
+
+          {(personalBlockTemplates || []).length === 0 && !showAddTemplate && (
+            <p className="text-xs text-text-muted italic">Keine Vorlagen. Füge z.B. "Gym", "Minijob" hinzu.</p>
+          )}
+
+          <div className="space-y-2">
+            {(personalBlockTemplates || []).map((tpl) => (
+              <div
+                key={tpl.id}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg bg-bg-hover"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium truncate">{tpl.label}</div>
+                  <div className="text-xs text-text-muted">
+                    {tpl.startTime}–{tpl.endTime}
+                    {tpl.activeDays.length > 0
+                      ? ` · ${tpl.activeDays.map(d => DAY_LABELS[d]).join(', ')}`
+                      : ' · Jeden Tag'}
+                  </div>
+                </div>
+                <button
+                  onClick={() => removeTemplate(tpl.id)}
+                  className="text-text-muted hover:text-danger transition-colors shrink-0"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {showAddTemplate && (
+            <div className="mt-3 p-3 rounded-lg border border-border space-y-3">
+              <input
+                type="text"
+                placeholder="Label (z.B. Gym, Minijob)"
+                value={newTplLabel}
+                onChange={(e) => setNewTplLabel(e.target.value)}
+                className="w-full bg-bg-hover border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-text-muted">Start</label>
+                  <input
+                    type="time"
+                    value={newTplStart}
+                    onChange={(e) => setNewTplStart(e.target.value)}
+                    className="w-full mt-1 bg-bg-hover border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-text-muted">Ende</label>
+                  <input
+                    type="time"
+                    value={newTplEnd}
+                    onChange={(e) => setNewTplEnd(e.target.value)}
+                    className="w-full mt-1 bg-bg-hover border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-text-muted mb-1 block">Aktive Tage (leer = jeden Tag)</label>
+                <div className="flex gap-1">
+                  {DAY_LABELS.map((label, i) => (
+                    <button
+                      key={i}
+                      onClick={() => toggleDay(i)}
+                      className={cn(
+                        'w-8 h-8 rounded-lg text-xs font-medium transition-all',
+                        newTplDays.includes(i)
+                          ? 'bg-accent text-white'
+                          : 'bg-bg-hover text-text-muted hover:bg-border'
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowAddTemplate(false)}
+                  className="flex-1 px-3 py-2 rounded-lg bg-bg-hover text-sm hover:bg-border transition-colors"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  onClick={handleAddTemplate}
+                  disabled={!newTplLabel.trim()}
+                  className="flex-1 px-3 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent/80 transition-colors disabled:opacity-40"
+                >
+                  Speichern
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </Card>
 
       {/* Data Management */}

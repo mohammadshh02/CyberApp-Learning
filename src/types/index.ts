@@ -207,6 +207,43 @@ export interface UserStats {
   skillScores: Record<string, number>;
 }
 
+// ===== DAILY PLANNER TYPES =====
+
+export interface PersonalBlock {
+  id: string;
+  label: string;
+  startTime: string;   // "16:00"
+  endTime: string;      // "18:00"
+  color?: string;
+}
+
+export interface DailyPlanConfig {
+  id?: number;
+  date: string;           // "2026-02-11"
+  wakeUpTime: string;     // "07:30"
+  bedTime: string;        // "22:30"
+  personalBlocks: PersonalBlock[];
+}
+
+export interface GeneratedBlock {
+  id: string;
+  startTime: string;
+  endTime: string;
+  label: string;
+  type: 'learning' | 'personal' | 'break';
+  curriculumBlockIndex?: number;
+  durationMinutes: number;
+}
+
+export interface PersonalBlockTemplate {
+  id: string;
+  label: string;
+  startTime: string;
+  endTime: string;
+  activeDays: number[];   // 0=So, 1=Mo...6=Sa (leer = jeden Tag)
+  color?: string;
+}
+
 // ===== SETTINGS =====
 
 export interface AppSettings {
@@ -215,6 +252,9 @@ export interface AppSettings {
   rescheduleStrategy: RescheduleStrategy;
   catchUpMaxExtraTasks: number;
   sidebarCollapsed: boolean;
+  defaultWakeUpTime: string;
+  defaultBedTime: string;
+  personalBlockTemplates: PersonalBlockTemplate[];
 }
 
 // ===== VIEW TYPES =====
