@@ -1,18 +1,20 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  CheckCircle2, Circle, Flame, ArrowRight,
+  CheckCircle2, Circle, Flame, ArrowRight, AlertTriangle, RotateCcw,
   BookOpen, Search, Newspaper, Swords, Coffee,
   Dumbbell, Moon, Briefcase, Code, Monitor,
 } from 'lucide-react';
 import { useProgressStore } from '@/stores/progress-store.ts';
 import { useSettingsStore } from '@/stores/settings-store.ts';
+import { useScheduleStore } from '@/stores/schedule-store.ts';
 import { getCurrentMonthIndex, getCurrentWeekInMonth, daysBetween } from '@/lib/scheduler.ts';
 import { getStreakMultiplier, getXpForTaskType } from '@/lib/xp-engine.ts';
-import { cn } from '@/lib/utils.ts';
+import { cn, getToday } from '@/lib/utils.ts';
 import { Card } from '@/components/shared/Card.tsx';
 import { XpBadge } from '@/components/shared/XpBadge.tsx';
 import { ProgressBar } from '@/components/shared/ProgressBar.tsx';
 import { DailyConfig } from '@/components/today/DailyConfig.tsx';
+import { BadDayModal } from '@/components/today/BadDayModal.tsx';
 import curriculum from '@/data/curriculum.json';
 import type { TaskType } from '@/types/index.ts';
 
@@ -50,24 +52,30 @@ interface CurriculumDay {
   timeBlocks: CurriculumTimeBlock[];
 }
 
+interface RescheduledTaskInfo {
+  id: string;
+  text: string;
+  category: string;
+  time: string;
+}
+
 function findCurrentMonth(monthIndex: number) {
-  // Direct match first
   const direct = curriculum.months.find(m => m.id === monthIndex);
   if (direct) return direct;
-  // Range match (e.g., month 14 → entry with range "13-15")
   for (const m of curriculum.months) {
     if (m.monthRange.includes('-')) {
       const [start, end] = m.monthRange.split('-').map(Number);
       if (monthIndex >= start && monthIndex <= end) return m;
     }
   }
-  // Fallback to last month
   return curriculum.months[curriculum.months.length - 1];
 }
 
 export function TodayView() {
   const { completedTaskIds, completeTask, uncompleteTask, currentStreak } = useProgressStore();
   const { startDate } = useSettingsStore();
+  const { getEntriesForDate } = useScheduleStore();
+  const [badDayOpen, setBadDayOpen] = useState(false);
 
   const currentMonth = getCurrentMonthIndex(startDate);
   const currentWeek = getCurrentWeekInMonth(startDate);
@@ -83,18 +91,15 @@ export function TodayView() {
     const diffDays = daysBetween(start, now);
     const dayInMonth = diffDays % 30;
     const dayNumber = dayInMonth + 1;
-
-    // Search across all weeks for this day
     const allDays = monthData.weeks.flatMap(w => w.days) as CurriculumDay[];
     return allDays.find(d => d.dayNumber === dayNumber) || null;
   }, [monthData, startDate]);
 
-  // Build the timeBlocks list — either from detailed day data or from template
+  // Build the timeBlocks list
   const timeBlocks = useMemo<CurriculumTimeBlock[]>(() => {
     if (todayData && todayData.timeBlocks.length > 0) {
       return todayData.timeBlocks as CurriculumTimeBlock[];
     }
-    // Fallback: use dailySchedule template (no specific tasks)
     return curriculum.dailySchedule.map((block, i) => ({
       id: `sched_${i}`,
       time: block.time,
@@ -108,6 +113,22 @@ export function TodayView() {
   const allDayTasks = useMemo(() => {
     return timeBlocks.flatMap(tb => tb.tasks);
   }, [timeBlocks]);
+
+  // Load rescheduled tasks for today
+  const rescheduledTasks = useMemo<RescheduledTaskInfo[]>(() => {
+    const today = getToday();
+    const entries = getEntriesForDate(today).filter(e => e.type === 'rescheduled');
+    const tasks: RescheduledTaskInfo[] = [];
+    for (const entry of entries) {
+      if (entry.note) {
+        try {
+          const parsed = JSON.parse(entry.note) as RescheduledTaskInfo[];
+          tasks.push(...parsed);
+        } catch { /* ignore non-JSON notes */ }
+      }
+    }
+    return tasks;
+  }, [getEntriesForDate]);
 
   // Monthly goals
   const goals = monthData?.goals || [];
@@ -125,20 +146,39 @@ export function TodayView() {
   // KPIs
   const kpis = monthData?.kpis || [];
 
-  // Totals
-  const allCheckable = [...allDayTasks, ...goals, ...weekGoals, ...kpis];
+  // Totals (include rescheduled tasks)
+  const allCheckable = [...allDayTasks, ...rescheduledTasks, ...goals, ...weekGoals, ...kpis];
   const completedCount = allCheckable.filter(t => completedTaskIds.has(t.id)).length;
   const totalCount = allCheckable.length;
 
-  // Find the next uncompleted task across all blocks (for "Du bist hier" highlight)
+  // Uncompleted day tasks for "Bad Day"
+  const uncompletedDayTasks = useMemo(() => {
+    return allDayTasks
+      .filter(t => !completedTaskIds.has(t.id))
+      .map(task => {
+        const tb = timeBlocks.find(b => b.tasks.some(t => t.id === task.id));
+        return {
+          id: task.id,
+          text: task.text,
+          category: tb?.category || '',
+          time: tb?.time || '',
+        };
+      });
+  }, [allDayTasks, completedTaskIds, timeBlocks]);
+
+  // Find the next uncompleted task
   const nextTaskId = useMemo(() => {
+    // Check rescheduled tasks first
+    for (const t of rescheduledTasks) {
+      if (!completedTaskIds.has(t.id)) return t.id;
+    }
     for (const tb of timeBlocks) {
       for (const task of tb.tasks) {
         if (!completedTaskIds.has(task.id)) return task.id;
       }
     }
     return null;
-  }, [timeBlocks, completedTaskIds]);
+  }, [timeBlocks, rescheduledTasks, completedTaskIds]);
 
   // Find the block containing the next task
   const nextBlockId = useMemo(() => {
@@ -180,12 +220,24 @@ export function TodayView() {
               Monat {monthData.monthRange} · Woche {currentWeek}
             </p>
           </div>
-          {multiplier > 1 && (
-            <div className="flex items-center gap-1 text-streak text-xs font-bold">
-              <Flame size={14} />
-              {multiplier}x XP
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {multiplier > 1 && (
+              <div className="flex items-center gap-1 text-streak text-xs font-bold">
+                <Flame size={14} />
+                {multiplier}x XP
+              </div>
+            )}
+            {/* Bad Day Button */}
+            {uncompletedDayTasks.length > 0 && (
+              <button
+                onClick={() => setBadDayOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-colors"
+              >
+                <AlertTriangle size={13} />
+                Bad Day
+              </button>
+            )}
+          </div>
         </div>
         <div className="mt-3">
           <ProgressBar value={completedCount} max={totalCount} showLabel />
@@ -197,6 +249,56 @@ export function TodayView() {
 
       {/* Daily Config — Activity Input */}
       <DailyConfig />
+
+      {/* === NACHHOLAUFGABEN (Rescheduled) === */}
+      {rescheduledTasks.length > 0 && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5">
+          <div className="flex items-center gap-2 px-4 py-3">
+            <RotateCcw size={16} className="text-amber-400 shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-bold">Nachholaufgaben</p>
+              <p className="text-[10px] text-text-muted">Verschoben von einem vorherigen Tag</p>
+            </div>
+            <span className="text-[10px] text-text-muted">
+              {rescheduledTasks.filter(t => completedTaskIds.has(t.id)).length}/{rescheduledTasks.length}
+            </span>
+          </div>
+          <div className="px-4 pb-3 space-y-1">
+            {rescheduledTasks.map((task) => {
+              const done = completedTaskIds.has(task.id);
+              const isNext = task.id === nextTaskId;
+              return (
+                <button
+                  key={task.id}
+                  onClick={() => handleToggle(task.id, 'daily_task')}
+                  className={cn(
+                    'w-full flex items-start gap-3 px-3 py-2 rounded-lg text-left transition-all',
+                    'hover:bg-bg-hover group',
+                    isNext && !done && 'bg-amber-500/10',
+                    done && 'opacity-50',
+                  )}
+                >
+                  {done ? (
+                    <CheckCircle2 size={16} className="text-success shrink-0 mt-0.5" />
+                  ) : (
+                    <Circle size={16} className={cn(
+                      'shrink-0 mt-0.5',
+                      isNext ? 'text-amber-400' : 'text-text-muted group-hover:text-amber-400',
+                    )} />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <span className={cn('text-sm block', done && 'line-through')}>{task.text}</span>
+                    {task.time && (
+                      <span className="text-[10px] text-text-muted">{task.category} · {task.time}</span>
+                    )}
+                  </div>
+                  {done && <XpBadge amount={10} className="shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* === TAGESPLAN === */}
       {allDayTasks.length > 0 && (
@@ -318,7 +420,6 @@ export function TodayView() {
           Monats-Ziele ({goals.filter(g => completedTaskIds.has(g.id)).length}/{goals.length})
         </h3>
         <div className="space-y-1.5">
-          {/* Uncompleted first */}
           {[...goals].sort((a, b) => {
             const aD = completedTaskIds.has(a.id) ? 1 : 0;
             const bD = completedTaskIds.has(b.id) ? 1 : 0;
@@ -422,6 +523,13 @@ export function TodayView() {
           </div>
         </Card>
       )}
+
+      {/* Bad Day Modal */}
+      <BadDayModal
+        open={badDayOpen}
+        onClose={() => setBadDayOpen(false)}
+        uncompletedTasks={uncompletedDayTasks}
+      />
     </div>
   );
 }
