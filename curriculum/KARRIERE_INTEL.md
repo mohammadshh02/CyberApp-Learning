@@ -1,0 +1,1 @@
+/Users/ikromsdikiy/Desktop/Cybersecurity 2026/KARRIERE_INTEL.md
