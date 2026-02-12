@@ -11,6 +11,8 @@ const VIEW_TITLES: Record<string, string> = {
   curriculum: 'Curriculum',
   glossary: 'Glossar',
   intel: 'Wissensdatenbank',
+  reports: 'Berichte',
+  notes: 'Notizen',
   achievements: 'Achievements',
   settings: 'Einstellungen',
 };

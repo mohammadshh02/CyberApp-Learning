@@ -267,7 +267,52 @@ export type ViewId =
   | 'glossary'
   | 'intel'
   | 'achievements'
+  | 'reports'
+  | 'notes'
   | 'settings';
+
+// ===== REPORT TYPES =====
+
+export const REPORT_CATEGORIES = [
+  'CTF Write-Up', 'Recherche', 'Fallstudie', 'Analyse', 'Sonstiges',
+] as const;
+export type ReportCategory = typeof REPORT_CATEGORIES[number];
+export type ReportType = 'auto' | 'custom';
+export type AutoReportPeriod = 'weekly' | 'monthly';
+
+export interface Report {
+  id: string;
+  type: ReportType;
+  title: string;
+  content: string;
+  category?: ReportCategory;
+  tags: string[];
+  period?: AutoReportPeriod;
+  periodStart?: string;
+  periodEnd?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ===== NOTES/WIKI TYPES =====
+
+export interface NoteFolder {
+  id: string;
+  name: string;
+  color?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WikiNote {
+  id: string;
+  title: string;
+  content: string;
+  folderId: string | null;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 // ===== INTEL TYPES =====
 

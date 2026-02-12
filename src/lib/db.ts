@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { TaskProgress, UnlockedBadge, ScheduleEntry, DailyLog, DailyPlanConfig, GlossaryEntry, FlashcardProgress, IntelNote, IntelDocRef } from '@/types/index.ts';
+import type { TaskProgress, UnlockedBadge, ScheduleEntry, DailyLog, DailyPlanConfig, GlossaryEntry, FlashcardProgress, IntelNote, IntelDocRef, Report, NoteFolder, WikiNote } from '@/types/index.ts';
 
 export interface SettingsRecord {
   key: string;
@@ -17,6 +17,9 @@ export class SovereignDB extends Dexie {
   flashcardProgress!: Table<FlashcardProgress, number>;
   intelNotes!: Table<IntelNote, string>;
   intelDocRefs!: Table<IntelDocRef, string>;
+  reports!: Table<Report, string>;
+  noteFolders!: Table<NoteFolder, string>;
+  wikiNotes!: Table<WikiNote, string>;
 
   constructor() {
     super('sovereign-tracker');
@@ -57,6 +60,21 @@ export class SovereignDB extends Dexie {
       intelNotes: 'id, companyId, updatedAt',
       intelDocRefs: 'id, companyId',
     });
+    this.version(5).stores({
+      progress: '++id, taskId, completedAt',
+      badges: '++id, badgeId, unlockedAt',
+      schedule: '++id, date, type',
+      dailyLog: '++id, &date',
+      settings: 'key',
+      dailyPlans: '++id, &date',
+      customGlossaryTerms: 'id, category',
+      flashcardProgress: '++id, &termId',
+      intelNotes: 'id, companyId, updatedAt',
+      intelDocRefs: 'id, companyId',
+      reports: 'id, type, category, createdAt',
+      noteFolders: 'id, name',
+      wikiNotes: 'id, folderId, updatedAt',
+    });
   }
 }
 
@@ -72,7 +90,7 @@ export async function setSetting(key: string, value: string): Promise<void> {
 }
 
 export async function exportAllData(): Promise<string> {
-  const [progress, badges, schedule, dailyLog, settings, dailyPlans, customGlossaryTerms, flashcardProgress, intelNotes, intelDocRefs] = await Promise.all([
+  const [progress, badges, schedule, dailyLog, settings, dailyPlans, customGlossaryTerms, flashcardProgress, intelNotes, intelDocRefs, reports, noteFolders, wikiNotes] = await Promise.all([
     db.progress.toArray(),
     db.badges.toArray(),
     db.schedule.toArray(),
@@ -83,13 +101,16 @@ export async function exportAllData(): Promise<string> {
     db.flashcardProgress.toArray(),
     db.intelNotes.toArray(),
     db.intelDocRefs.toArray(),
+    db.reports.toArray(),
+    db.noteFolders.toArray(),
+    db.wikiNotes.toArray(),
   ]);
-  return JSON.stringify({ progress, badges, schedule, dailyLog, settings, dailyPlans, customGlossaryTerms, flashcardProgress, intelNotes, intelDocRefs }, null, 2);
+  return JSON.stringify({ progress, badges, schedule, dailyLog, settings, dailyPlans, customGlossaryTerms, flashcardProgress, intelNotes, intelDocRefs, reports, noteFolders, wikiNotes }, null, 2);
 }
 
 export async function importAllData(json: string): Promise<void> {
   const data = JSON.parse(json);
-  await db.transaction('rw', [db.progress, db.badges, db.schedule, db.dailyLog, db.settings, db.dailyPlans, db.customGlossaryTerms, db.flashcardProgress, db.intelNotes, db.intelDocRefs], async () => {
+  await db.transaction('rw', [db.progress, db.badges, db.schedule, db.dailyLog, db.settings, db.dailyPlans, db.customGlossaryTerms, db.flashcardProgress, db.intelNotes, db.intelDocRefs, db.reports, db.noteFolders, db.wikiNotes], async () => {
     await db.progress.clear();
     await db.badges.clear();
     await db.schedule.clear();
@@ -100,6 +121,9 @@ export async function importAllData(json: string): Promise<void> {
     await db.flashcardProgress.clear();
     await db.intelNotes.clear();
     await db.intelDocRefs.clear();
+    await db.reports.clear();
+    await db.noteFolders.clear();
+    await db.wikiNotes.clear();
 
     if (data.progress) await db.progress.bulkAdd(data.progress);
     if (data.badges) await db.badges.bulkAdd(data.badges);
@@ -111,11 +135,14 @@ export async function importAllData(json: string): Promise<void> {
     if (data.flashcardProgress) await db.flashcardProgress.bulkAdd(data.flashcardProgress);
     if (data.intelNotes) await db.intelNotes.bulkAdd(data.intelNotes);
     if (data.intelDocRefs) await db.intelDocRefs.bulkAdd(data.intelDocRefs);
+    if (data.reports) await db.reports.bulkAdd(data.reports);
+    if (data.noteFolders) await db.noteFolders.bulkAdd(data.noteFolders);
+    if (data.wikiNotes) await db.wikiNotes.bulkAdd(data.wikiNotes);
   });
 }
 
 export async function clearAllData(): Promise<void> {
-  await db.transaction('rw', [db.progress, db.badges, db.schedule, db.dailyLog, db.settings, db.dailyPlans, db.customGlossaryTerms, db.flashcardProgress, db.intelNotes, db.intelDocRefs], async () => {
+  await db.transaction('rw', [db.progress, db.badges, db.schedule, db.dailyLog, db.settings, db.dailyPlans, db.customGlossaryTerms, db.flashcardProgress, db.intelNotes, db.intelDocRefs, db.reports, db.noteFolders, db.wikiNotes], async () => {
     await db.progress.clear();
     await db.badges.clear();
     await db.schedule.clear();
@@ -126,5 +153,8 @@ export async function clearAllData(): Promise<void> {
     await db.flashcardProgress.clear();
     await db.intelNotes.clear();
     await db.intelDocRefs.clear();
+    await db.reports.clear();
+    await db.noteFolders.clear();
+    await db.wikiNotes.clear();
   });
 }

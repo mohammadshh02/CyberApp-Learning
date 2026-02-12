@@ -15,6 +15,7 @@ import { Card } from '@/components/shared/Card.tsx';
 import { XpBadge } from '@/components/shared/XpBadge.tsx';
 import { ProgressBar } from '@/components/shared/ProgressBar.tsx';
 import { DailyConfig } from '@/components/today/DailyConfig.tsx';
+import { GeneratedSchedule } from '@/components/today/GeneratedSchedule.tsx';
 import { BadDayModal } from '@/components/today/BadDayModal.tsx';
 import curriculum from '@/data/curriculum.json';
 import { getAIMonthForCurriculumMonth, AI_CURRICULUM } from '@/data/ai-curriculum.ts';
@@ -279,6 +280,9 @@ export function TodayView() {
 
       {/* Daily Config — Activity Input */}
       <DailyConfig />
+
+      {/* Generated Schedule — dynamisch angepasster Tagesplan */}
+      <GeneratedSchedule />
 
       {/* === NACHHOLAUFGABEN (Rescheduled) === */}
       {rescheduledTasks.length > 0 && (
