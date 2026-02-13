@@ -266,6 +266,8 @@ export type ViewId =
   | 'curriculum'
   | 'glossary'
   | 'intel'
+  | 'news'
+  | 'vision'
   | 'achievements'
   | 'reports'
   | 'notes'

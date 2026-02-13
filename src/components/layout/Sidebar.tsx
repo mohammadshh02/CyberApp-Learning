@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, CalendarDays, BookOpen, Trophy, Settings, Sun,
-  ChevronLeft, ChevronRight, Crosshair, BookA, Database, FileText, NotebookPen,
+  ChevronLeft, ChevronRight, Crosshair, BookA, Database, FileText, NotebookPen, Eye, Newspaper,
 } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store.ts';
 import { useProgressStore } from '@/stores/progress-store.ts';
@@ -16,8 +16,10 @@ const NAV_ITEMS: { id: ViewId; label: string; icon: React.ReactNode }[] = [
   { id: 'curriculum', label: 'Curriculum', icon: <BookOpen size={20} /> },
   { id: 'glossary', label: 'Glossar', icon: <BookA size={20} /> },
   { id: 'intel', label: 'Intel', icon: <Database size={20} /> },
+  { id: 'news', label: 'News', icon: <Newspaper size={20} /> },
   { id: 'reports', label: 'Berichte', icon: <FileText size={20} /> },
   { id: 'notes', label: 'Notizen', icon: <NotebookPen size={20} /> },
+  { id: 'vision', label: 'Vision', icon: <Eye size={20} /> },
   { id: 'achievements', label: 'Achievements', icon: <Trophy size={20} /> },
   { id: 'settings', label: 'Einstellungen', icon: <Settings size={20} /> },
 ];

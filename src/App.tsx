@@ -19,6 +19,8 @@ import { IntelView } from './components/intel/IntelView.tsx';
 import { ReportsView } from './components/reports/ReportsView.tsx';
 import { NotesView } from './components/notes/NotesView.tsx';
 import { SettingsView } from './components/settings/SettingsView.tsx';
+import { VisionView } from './components/vision/VisionView.tsx';
+import { NewsView } from './components/news/NewsView.tsx';
 
 function App() {
   const { activeView } = useAppStore();
@@ -51,6 +53,8 @@ function App() {
       case 'curriculum': return <CurriculumView />;
       case 'glossary': return <GlossaryView />;
       case 'intel': return <IntelView />;
+      case 'news': return <NewsView />;
+      case 'vision': return <VisionView />;
       case 'reports': return <ReportsView />;
       case 'notes': return <NotesView />;
       case 'achievements': return <AchievementsView />;
