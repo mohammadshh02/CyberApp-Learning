@@ -89,6 +89,90 @@ export interface IncomeScenario {
   lifestyle: string;
 }
 
+// ===== MASTERPLAN =====
+
+export interface MasterplanPhase {
+  id: string;
+  age: string;
+  years: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  milestones: string[];
+  status: 'current' | 'upcoming' | 'endgame';
+}
+
+export const MASTERPLAN_PHASES: MasterplanPhase[] = [
+  {
+    id: 'foundation',
+    age: '23–26',
+    years: '2026–2029',
+    title: 'FOUNDATION',
+    subtitle: 'Skills. Studium. Certs. Erste Deals. Leise dokumentieren.',
+    description: 'Die 36-Monats-Roadmap durchziehen, parallel IT-Sicherheit an der RUB Bochum abschließen (1 Jahr versetzt, kein Problem). Kein Content-Creator-Modus — reiner Fokus auf Substanz. Was du nebenbei tust: dokumentieren was du eh machst. CTF Write-Ups, GitHub-Projekte, ab und zu ein LinkedIn-Post. Kein Zeitverlust, aber stiller Aufbau deiner Online-Präsenz.',
+    milestones: [
+      'RUB IT-Sicherheit — Semester versetzt nachholen, Abschluss ~2029',
+      'OSCP + 3-4 weitere Top-Certs parallel zum Studium',
+      '36-Monats-Sovereign-Plan abgeschlossen',
+      'Erste Freelance-Aufträge (€600-1.000/Tag)',
+      'CTF Write-Ups & GitHub als stille Dokumentation',
+      'Schweizer Netzwerk beginnt aufzubauen',
+    ],
+    status: 'current',
+  },
+  {
+    id: 'establishment',
+    age: '26–28',
+    years: '2029–2031',
+    title: 'ESTABLISHMENT',
+    subtitle: 'Premium-Freelancer. Schweizer Markt. Content-Maschine AN.',
+    description: 'JETZT hast du Substanz: RUB-Abschluss, OSCP, echte Projekte, Freelance-Track-Record. Jetzt schaltest du die Content-Maschine an — mit Autorität. Jeder Post, jedes Video, jede Case Study ist glaubwürdig weil du es GETAN hast. Schweizer Klienten werden dein Hauptmarkt. Tagessatz CHF 1.500-2.500.',
+    milestones: [
+      'Content-Maschine starten — mit Beweis statt Theorie',
+      'Schweizer Klienten als Haupteinnahme (CHF 1.500-2.500/Tag)',
+      'Netzwerk in Zürich & Genf etabliert',
+      'Social Media Präsenz mit echter Autorität',
+      'Erste Kontakte in den Golf-Staaten',
+      'Finanzielle Rücklagen aufgebaut',
+    ],
+    status: 'upcoming',
+  },
+  {
+    id: 'community',
+    age: '28–29',
+    years: '2031–2032',
+    title: 'COMMUNITY LAUNCH',
+    subtitle: 'Deine Paid Community. Echte Aufträge. Echtes Geld.',
+    description: 'Dein Content hat dir eine Audience gebaut. Deine Deals geben dir die Aufträge. Jetzt launchst du die Community — keine Lernplattform, sondern ein System: echte, bezahlte Aufträge gehen rein, die Top 3 liefern ab und verdienen mit. Du nimmst deinen Overhead. Members kriegen echte Erfahrung, echtes Geld, echte Referenzen. Keiner sonst macht das so.',
+    milestones: [
+      'Paid Community live (€97-197/Monat)',
+      'Erste echte Aufträge in die Community',
+      'Top-Performer identifiziert und gefördert',
+      'Tier-System: Rookies → Operators → Elite',
+      'Flywheel beginnt sich zu drehen',
+      'Mundpropaganda + Content bringen neue Members',
+    ],
+    status: 'upcoming',
+  },
+  {
+    id: 'endgame',
+    age: '29–30',
+    years: '2032–2033',
+    title: 'COMMANDER',
+    subtitle: 'Deine Cyber-Armee. Du akquirierst. Sie liefern.',
+    description: 'Das Endgame. Du hast eine loyale Armee aus Spezialisten hinter dir. Du akquirierst die Aufträge, baust die Systeme, kontrollierst die Infrastruktur. Deine Members verdienen mit und sind die bestausgebildeten Operatoren im DACH-Raum. Klienten kommen zu DIR — nicht du zu ihnen. Dein Studium, deine Certs, dein Content, deine Community — alles hat hierhin geführt.',
+    milestones: [
+      'Eigene Boutique mit Community als Talent Pool',
+      'Aufträge aus Schweiz, DACH und Golf-Staaten',
+      'Dein Name = die Marke',
+      'CHF 400-600K+ netto',
+      'Du arbeitest, weil du willst',
+      'Die krasseste Hacker-Community im deutschsprachigen Raum',
+    ],
+    status: 'endgame',
+  },
+];
+
 // ===== LIFESTYLE LOCATIONS (10) =====
 
 export const LIFESTYLE_LOCATIONS: LifestyleLocation[] = [

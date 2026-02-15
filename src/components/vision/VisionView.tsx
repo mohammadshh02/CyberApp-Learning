@@ -11,22 +11,23 @@ import { cn } from '@/lib/utils.ts';
 import { useAppStore } from '@/stores/app-store.ts';
 import type {
   LifestyleLocation, VisionSkill, DeepDive, FamousCase,
-  CertTimeline, CareerPath, IncomeScenario,
+  CertTimeline, CareerPath, IncomeScenario, MasterplanPhase,
 } from '@/data/vision-data.ts';
 import {
   LIFESTYLE_LOCATIONS, SKILLS_ARSENAL, DEEP_DIVES, FAMOUS_CASES,
-  CERTIFICATIONS_TIMELINE, CAREER_PATHS, INCOME_SCENARIOS,
+  CERTIFICATIONS_TIMELINE, CAREER_PATHS, INCOME_SCENARIOS, MASTERPLAN_PHASES,
 } from '@/data/vision-data.ts';
 
 // --- Constants ---------------------------------------------------------------
 
 const SECTION_IDS = [
-  'lifestyle', 'skills-arsenal', 'deep-dives', 'famous-cases',
+  'masterplan', 'lifestyle', 'skills-arsenal', 'deep-dives', 'famous-cases',
   'certifications', 'career-paths', 'income',
 ] as const;
 type SectionId = (typeof SECTION_IDS)[number];
 
 const SECTION_LABELS: Record<SectionId, string> = {
+  masterplan: 'Masterplan',
   lifestyle: 'Lifestyle', 'skills-arsenal': 'Skills Arsenal',
   'deep-dives': 'Deep Dives', 'famous-cases': 'Famous Cases',
   certifications: 'Certifications', 'career-paths': 'Career Paths',
@@ -778,6 +779,207 @@ function CareerPathsSection() {
   );
 }
 
+// --- Masterplan Section ------------------------------------------------------
+
+function MasterplanSection() {
+  return (
+    <div>
+      <SectionHeader id="masterplan" icon={<Crosshair size={20} />}
+        title="MASTERPLAN" subtitle="Von 23 zum Commander — dein Weg zur eigenen Cyber-Armee"
+        count={MASTERPLAN_PHASES.length} />
+
+      {/* Vision statement */}
+      <Card className="mb-6 bg-gradient-to-r from-accent/10 via-bg-card to-accent/5 border-accent/20">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
+            <Target size={24} className="text-accent" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm mb-1">Das Endgame</h3>
+            <p className="text-xs text-text-muted leading-relaxed">
+              Keine Lernplattform. Keine Kurse. Du baust eine <span className="text-accent font-semibold">dezentrale Cybersecurity-Agentur</span> als
+              Paid Community. Echte Aufträge, echtes Geld, echte Erfahrung. Du akquirierst die Deals,
+              dein System verteilt sie, deine Armee liefert. Mit 30 bist du der Commander.
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Timeline */}
+      <div className="relative">
+        {/* Vertical line */}
+        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border" />
+
+        <div className="space-y-6">
+          {MASTERPLAN_PHASES.map((phase: MasterplanPhase, idx: number) => (
+            <div key={phase.id} className="relative pl-16">
+              {/* Timeline dot */}
+              <div className={cn(
+                'absolute left-4 w-5 h-5 rounded-full border-2 flex items-center justify-center',
+                phase.status === 'current'
+                  ? 'bg-accent border-accent shadow-lg shadow-accent/30'
+                  : phase.status === 'endgame'
+                    ? 'bg-gradient-to-br from-accent to-success border-success shadow-lg shadow-success/30'
+                    : 'bg-bg-card border-border'
+              )}>
+                {phase.status === 'current' && (
+                  <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                )}
+                {phase.status === 'endgame' && (
+                  <Crosshair size={10} className="text-white" />
+                )}
+              </div>
+
+              {/* Age badge */}
+              <div className="absolute left-14 -top-0.5">
+                <span className={cn(
+                  'text-[10px] font-bold px-2 py-0.5 rounded-full',
+                  phase.status === 'current'
+                    ? 'bg-accent/20 text-accent'
+                    : phase.status === 'endgame'
+                      ? 'bg-success/20 text-success'
+                      : 'bg-bg-hover text-text-muted'
+                )}>
+                  {phase.age} Jahre
+                </span>
+              </div>
+
+              <Card className={cn(
+                'mt-6',
+                phase.status === 'current' && 'border-accent/30',
+                phase.status === 'endgame' && 'border-success/30 bg-gradient-to-r from-bg-card to-success/5'
+              )}>
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className={cn(
+                        'font-black text-sm tracking-wide',
+                        phase.status === 'current' && 'text-accent',
+                        phase.status === 'endgame' && 'text-success'
+                      )}>
+                        {phase.title}
+                      </h3>
+                      {phase.status === 'current' && (
+                        <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded-full font-medium animate-pulse">
+                          DU BIST HIER
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-text-muted">{phase.subtitle}</p>
+                  </div>
+                  <span className="text-[10px] text-text-muted shrink-0">{phase.years}</span>
+                </div>
+
+                <p className="text-xs text-text-muted leading-relaxed mb-3">{phase.description}</p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  {phase.milestones.map((m, i) => (
+                    <div key={i} className="flex items-start gap-2 text-xs">
+                      <div className={cn(
+                        'w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5',
+                        phase.status === 'current' ? 'bg-accent/10' : phase.status === 'endgame' ? 'bg-success/10' : 'bg-bg-hover'
+                      )}>
+                        {phase.status === 'endgame'
+                          ? <Crosshair size={8} className="text-success" />
+                          : <ArrowRight size={8} className={phase.status === 'current' ? 'text-accent' : 'text-text-muted'} />
+                        }
+                      </div>
+                      <span className="text-text-muted">{m}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          ))}
+        </div>
+
+        {/* Content Strategy callout */}
+        <Card className="mt-8 border-border">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-4 flex items-center gap-2">
+            <Layers size={14} /> Content-Strategie
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-3 rounded-lg bg-accent/5 border border-accent/10">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-bold bg-accent/20 text-accent px-2 py-0.5 rounded-full">JETZT — 23-26</span>
+              </div>
+              <h5 className="text-xs font-bold mb-1">Dokumentieren, nicht kreieren</h5>
+              <ul className="text-[11px] text-text-muted space-y-1">
+                <li className="flex items-start gap-1.5"><ArrowRight size={10} className="mt-0.5 text-accent shrink-0" />CTF Write-Ups veröffentlichen (machst du eh)</li>
+                <li className="flex items-start gap-1.5"><ArrowRight size={10} className="mt-0.5 text-accent shrink-0" />GitHub-Projekte pflegen (zeigt echte Skills)</li>
+                <li className="flex items-start gap-1.5"><ArrowRight size={10} className="mt-0.5 text-accent shrink-0" />Ab und zu LinkedIn-Post (was du gerade lernst)</li>
+                <li className="flex items-start gap-1.5"><Clock size={10} className="mt-0.5 text-text-muted shrink-0" />15 Min./Tag extra — kein Zeitverlust</li>
+              </ul>
+            </div>
+            <div className="p-3 rounded-lg bg-success/5 border border-success/10">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-bold bg-success/20 text-success px-2 py-0.5 rounded-full">AB 26+ — ESTABLISHMENT</span>
+              </div>
+              <h5 className="text-xs font-bold mb-1">Content-Maschine AN</h5>
+              <ul className="text-[11px] text-text-muted space-y-1">
+                <li className="flex items-start gap-1.5"><ArrowRight size={10} className="mt-0.5 text-success shrink-0" />RUB-Abschluss + OSCP + echte Projekte = Autorität</li>
+                <li className="flex items-start gap-1.5"><ArrowRight size={10} className="mt-0.5 text-success shrink-0" />Jeder Post ist glaubwürdig weil du es GETAN hast</li>
+                <li className="flex items-start gap-1.5"><ArrowRight size={10} className="mt-0.5 text-success shrink-0" />Case Studies, Videos, Deep Dives veröffentlichen</li>
+                <li className="flex items-start gap-1.5"><ArrowRight size={10} className="mt-0.5 text-success shrink-0" />Audience aufbauen → Fundament für Community-Launch</li>
+              </ul>
+            </div>
+          </div>
+        </Card>
+
+        {/* Studium Integration callout */}
+        <Card className="mt-4 border-border">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3 flex items-center gap-2">
+            <BookOpen size={14} /> RUB IT-Sicherheit — Studium-Integration
+          </h4>
+          <p className="text-xs text-text-muted mb-3">
+            Dein Studium und der Sovereign-Plan sind <span className="text-accent font-semibold">kein Widerspruch</span> — die RUB
+            deckt Kryptographie, Netzwerksicherheit, Systemsicherheit und Reverse Engineering ab. Du lernst nicht doppelt, du lernst <span className="font-semibold text-text">verstärkt</span>.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { sem: 'Sem. 2 (jetzt)', desc: '2 Module — entspannt, Vollgas Sovereign-Plan', active: true },
+              { sem: 'Sem. 3', desc: '1. Semester nachholen — mehr Uni-Last, Cyber reduziert', active: false },
+              { sem: 'Sem. 4+', desc: 'Versetzt aber stabil — beides parallel', active: false },
+              { sem: '~2029', desc: 'Abschluss — 1 Jahr später, aber mit doppeltem Skill-Stack', active: false },
+            ].map((s, i) => (
+              <div key={i} className={cn(
+                'flex-1 min-w-[140px] p-2 rounded-lg text-[11px] border',
+                s.active ? 'bg-accent/5 border-accent/20' : 'bg-bg-hover border-border'
+              )}>
+                <span className={cn('font-bold block mb-0.5', s.active ? 'text-accent' : 'text-text-muted')}>{s.sem}</span>
+                <span className="text-text-muted">{s.desc}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Flywheel callout at the bottom */}
+        <Card className="mt-4 border-accent/20">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-accent mb-3 flex items-center gap-2">
+            <Zap size={14} /> Das Flywheel
+          </h4>
+          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-text-muted">
+            {[
+              'Du akquirierst Klienten',
+              'Auftrag → Community',
+              'Top 3 liefern & verdienen',
+              'Members wachsen',
+              'Bessere Ergebnisse',
+              'Mehr Klienten',
+              'Dein Name = Marke',
+            ].map((step, i) => (
+              <span key={i} className="flex items-center gap-2">
+                <span className="bg-bg-hover px-2.5 py-1 rounded-full">{step}</span>
+                {i < 6 && <ArrowRight size={12} className="text-accent" />}
+              </span>
+            ))}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 // --- 9. IncomeSection --------------------------------------------------------
 
 function IncomeSection() {
@@ -911,6 +1113,10 @@ export function VisionView() {
 
         {/* Content sections */}
         <div className="flex-1 min-w-0 space-y-2">
+          <div ref={registerRef('masterplan')} data-section="masterplan">
+            <MasterplanSection />
+          </div>
+
           <div ref={registerRef('lifestyle')} data-section="lifestyle">
             <LifestyleSection />
           </div>
