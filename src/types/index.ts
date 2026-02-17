@@ -267,6 +267,7 @@ export type ViewId =
   | 'glossary'
   | 'intel'
   | 'news'
+  | 'ai'
   | 'vision'
   | 'achievements'
   | 'reports'

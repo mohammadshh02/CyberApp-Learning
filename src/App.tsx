@@ -21,6 +21,7 @@ import { NotesView } from './components/notes/NotesView.tsx';
 import { SettingsView } from './components/settings/SettingsView.tsx';
 import { VisionView } from './components/vision/VisionView.tsx';
 import { NewsView } from './components/news/NewsView.tsx';
+import { AiView } from './components/ai/AiView.tsx';
 
 function App() {
   const { activeView } = useAppStore();
@@ -54,6 +55,7 @@ function App() {
       case 'glossary': return <GlossaryView />;
       case 'intel': return <IntelView />;
       case 'news': return <NewsView />;
+      case 'ai': return <AiView />;
       case 'vision': return <VisionView />;
       case 'reports': return <ReportsView />;
       case 'notes': return <NotesView />;
