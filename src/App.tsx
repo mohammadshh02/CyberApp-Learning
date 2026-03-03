@@ -22,6 +22,9 @@ import { SettingsView } from './components/settings/SettingsView.tsx';
 import { VisionView } from './components/vision/VisionView.tsx';
 import { NewsView } from './components/news/NewsView.tsx';
 import { AiView } from './components/ai/AiView.tsx';
+import { RamadanView } from './components/ramadan/RamadanView.tsx';
+import { ShortcutView } from './components/shortcut/ShortcutView.tsx';
+import { BunkerBauerView } from './components/bunkerbauer/BunkerBauerView.tsx';
 
 function App() {
   const { activeView } = useAppStore();
@@ -59,6 +62,9 @@ function App() {
       case 'vision': return <VisionView />;
       case 'reports': return <ReportsView />;
       case 'notes': return <NotesView />;
+      case 'ramadan': return <RamadanView />;
+      case 'shortcut': return <ShortcutView />;
+      case 'bunkerbauer': return <BunkerBauerView />;
       case 'achievements': return <AchievementsView />;
       case 'settings': return <SettingsView />;
       default: return <Dashboard />;

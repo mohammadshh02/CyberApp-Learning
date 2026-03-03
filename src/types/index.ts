@@ -272,6 +272,9 @@ export type ViewId =
   | 'achievements'
   | 'reports'
   | 'notes'
+  | 'ramadan'
+  | 'shortcut'
+  | 'bunkerbauer'
   | 'settings';
 
 // ===== REPORT TYPES =====

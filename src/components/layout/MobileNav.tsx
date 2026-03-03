@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, CalendarDays, BookOpen, Trophy, Sun, BookA, Database, FileText, NotebookPen, Eye, Newspaper, Brain,
+  LayoutDashboard, CalendarDays, BookOpen, Trophy, Sun, BookA, Database, FileText, NotebookPen, Eye, Newspaper, Brain, Moon, Zap, Shield,
 } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store.ts';
 import { cn } from '@/lib/utils.ts';
@@ -16,6 +16,9 @@ const NAV_ITEMS: { id: ViewId; label: string; icon: React.ReactNode }[] = [
   { id: 'ai', label: 'AI', icon: <Brain size={20} /> },
   { id: 'reports', label: 'Berichte', icon: <FileText size={20} /> },
   { id: 'notes', label: 'Notizen', icon: <NotebookPen size={20} /> },
+  { id: 'ramadan', label: 'Ramadan', icon: <Moon size={20} /> },
+  { id: 'shortcut', label: 'Shortcut', icon: <Zap size={20} /> },
+  { id: 'bunkerbauer', label: 'BBT', icon: <Shield size={20} /> },
   { id: 'vision', label: 'Vision', icon: <Eye size={20} /> },
   { id: 'achievements', label: 'Badges', icon: <Trophy size={20} /> },
 ];

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   CheckCircle2, Circle, Flame, ArrowRight, AlertTriangle, RotateCcw,
   BookOpen, Search, Newspaper, Swords, Coffee,
-  Dumbbell, Moon, Briefcase, Code, Monitor, Brain,
+  Dumbbell, Moon, Briefcase, Code, Monitor, Brain, Shield,
   ChevronDown, ChevronRight, Lock, Sparkles,
 } from 'lucide-react';
 import { useProgressStore } from '@/stores/progress-store.ts';
@@ -19,6 +19,7 @@ import { GeneratedSchedule } from '@/components/today/GeneratedSchedule.tsx';
 import { BadDayModal } from '@/components/today/BadDayModal.tsx';
 import curriculum from '@/data/curriculum.json';
 import { getAIMonthForCurriculumMonth, AI_CURRICULUM } from '@/data/ai-curriculum.ts';
+import { OT_CURRICULUM } from '@/data/ot-curriculum.ts';
 import type { TaskType } from '@/types/index.ts';
 
 // Category icons + colors
@@ -35,6 +36,7 @@ const BLOCK_STYLES: Record<string, { icon: typeof BookOpen; color: string }> = {
   'ISLAM': { icon: Moon, color: 'text-indigo-400' },
   'PROJEKT': { icon: Monitor, color: 'text-orange-400' },
   'AI SECURITY': { icon: Brain, color: 'text-pink-400' },
+  'OT SECURITY': { icon: Shield, color: 'text-orange-400' },
 };
 
 function getBlockStyle(category: string) {
@@ -82,6 +84,8 @@ export function TodayView() {
   const [badDayOpen, setBadDayOpen] = useState(false);
   const [expandedAIMonths, setExpandedAIMonths] = useState<Set<string>>(new Set());
   const [aiOverviewOpen, setAiOverviewOpen] = useState(false);
+  const [expandedOTMonths, setExpandedOTMonths] = useState<Set<string>>(new Set());
+  const [otOverviewOpen, setOtOverviewOpen] = useState(false);
 
   const currentMonth = getCurrentMonthIndex(startDate);
   const currentWeek = getCurrentWeekInMonth(startDate);
@@ -760,6 +764,172 @@ export function TodayView() {
                                       <Lock size={14} className="text-text-muted/50 shrink-0 mt-0.5" />
                                     ) : (
                                       <Circle size={14} className="text-text-muted shrink-0 mt-0.5 group-hover:text-pink-400" />
+                                    )}
+                                    <span className={cn('text-xs flex-1', done && 'line-through')}>
+                                      {task.text}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+
+      {/* === OT/ICS SECURITY — ALLE THEMEN === */}
+      <Card>
+        <button
+          onClick={() => setOtOverviewOpen(!otOverviewOpen)}
+          className="w-full flex items-center gap-3 text-left"
+        >
+          <Shield size={18} className="text-orange-400 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-bold">OT/ICS Security — Alle Themen</h3>
+            <p className="text-[10px] text-text-muted mt-0.5">
+              12 Monate · {OT_CURRICULUM.reduce((sum, m) => sum + m.weeks.length, 0)} Wochen · {OT_CURRICULUM.reduce((sum, m) => sum + m.weeks.reduce((ws, w) => ws + w.tasks.length, 0), 0)} Aufgaben
+            </p>
+          </div>
+          {otOverviewOpen ? (
+            <ChevronDown size={16} className="text-text-muted shrink-0" />
+          ) : (
+            <ChevronRight size={16} className="text-text-muted shrink-0" />
+          )}
+        </button>
+
+        {otOverviewOpen && (
+          <div className="mt-4 space-y-2">
+            {OT_CURRICULUM.map((month) => {
+              const monthNum = parseInt(month.monthRange);
+              const isCurrent = monthNum === currentMonth;
+              const isPast = monthNum < currentMonth;
+              const isExpanded = expandedOTMonths.has(month.monthRange);
+
+              const toggleMonth = () => {
+                setExpandedOTMonths(prev => {
+                  const next = new Set(prev);
+                  if (next.has(month.monthRange)) {
+                    next.delete(month.monthRange);
+                  } else {
+                    next.add(month.monthRange);
+                  }
+                  return next;
+                });
+              };
+
+              const allMonthTaskIds = month.weeks.flatMap(w => w.tasks.map(t => t.id));
+              const completedInMonth = allMonthTaskIds.filter(id => completedTaskIds.has(id)).length;
+              const totalInMonth = allMonthTaskIds.length;
+
+              let phase = '';
+              if (monthNum <= 3) phase = 'GRUNDLAGEN';
+              else if (monthNum <= 6) phase = 'STANDARDS & TOOLS';
+              else if (monthNum <= 9) phase = 'HANDS-ON & IR';
+              else phase = 'EXPERT & BUSINESS';
+
+              return (
+                <div
+                  key={month.monthRange}
+                  className={cn(
+                    'rounded-xl border transition-all',
+                    isCurrent
+                      ? 'border-orange-500/40 bg-orange-500/5 ring-1 ring-orange-500/20'
+                      : isPast
+                        ? 'border-border/50 bg-bg-card/60'
+                        : 'border-border bg-bg-card',
+                  )}
+                >
+                  <button
+                    onClick={toggleMonth}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                  >
+                    {isExpanded ? (
+                      <ChevronDown size={14} className="text-text-muted shrink-0" />
+                    ) : (
+                      <ChevronRight size={14} className="text-text-muted shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className={cn(
+                          'text-[10px] font-bold px-1.5 py-0.5 rounded',
+                          isCurrent
+                            ? 'bg-orange-500/20 text-orange-400'
+                            : 'bg-bg-hover text-text-muted',
+                        )}>
+                          Monat {month.monthRange}
+                        </span>
+                        <span className="text-[10px] text-text-muted">{phase}</span>
+                        {isCurrent && (
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-orange-400">
+                            <Sparkles size={10} /> AKTUELL
+                          </span>
+                        )}
+                      </div>
+                      <p className={cn('text-sm font-medium mt-0.5', isPast && !isCurrent && 'text-text-muted')}>
+                        {month.title}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-[10px] text-text-muted">
+                        {completedInMonth}/{totalInMonth}
+                      </span>
+                      {completedInMonth === totalInMonth && totalInMonth > 0 && (
+                        <CheckCircle2 size={12} className="text-success ml-1 inline" />
+                      )}
+                    </div>
+                  </button>
+
+                  {isExpanded && (
+                    <div className="px-4 pb-3 space-y-3">
+                      {month.weeks.map((week, wi) => {
+                        const isCurrentWeek = isCurrent && wi === currentWeek - 1;
+                        const weekCompleted = week.tasks.filter(t => completedTaskIds.has(t.id)).length;
+
+                        return (
+                          <div key={wi}>
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <div className={cn(
+                                'w-1.5 h-1.5 rounded-full shrink-0',
+                                isCurrentWeek ? 'bg-orange-400' : weekCompleted === week.tasks.length && week.tasks.length > 0 ? 'bg-success' : 'bg-text-muted/30',
+                              )} />
+                              <p className={cn(
+                                'text-xs font-medium',
+                                isCurrentWeek && 'text-orange-400',
+                              )}>
+                                Woche {wi + 1}: {week.topic}
+                              </p>
+                              <span className="text-[10px] text-text-muted ml-auto">
+                                {weekCompleted}/{week.tasks.length}
+                              </span>
+                            </div>
+                            <div className="space-y-1 ml-3.5">
+                              {week.tasks.map((task) => {
+                                const done = completedTaskIds.has(task.id);
+                                const isFuture = !isCurrent && monthNum > currentMonth;
+                                return (
+                                  <button
+                                    key={task.id}
+                                    onClick={() => handleToggle(task.id, 'daily_task')}
+                                    className={cn(
+                                      'w-full flex items-start gap-2.5 px-2.5 py-1.5 rounded-lg text-left transition-all',
+                                      'hover:bg-bg-hover group',
+                                      done && 'opacity-50',
+                                      isFuture && 'opacity-40',
+                                    )}
+                                  >
+                                    {done ? (
+                                      <CheckCircle2 size={14} className="text-success shrink-0 mt-0.5" />
+                                    ) : isFuture ? (
+                                      <Lock size={14} className="text-text-muted/50 shrink-0 mt-0.5" />
+                                    ) : (
+                                      <Circle size={14} className="text-text-muted shrink-0 mt-0.5 group-hover:text-orange-400" />
                                     )}
                                     <span className={cn('text-xs flex-1', done && 'line-through')}>
                                       {task.text}
